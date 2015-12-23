@@ -44,6 +44,46 @@ describe("ten card problem tests", function() {
             
             done();
         });
+        
+         it("should be able to get a random card index", function(done) {
+        
+            var size = 10;
+            var individual = new Individual();
+            individual.random(size);
+
+            var index = individual.getRandomCardIndex();            
+            
+            should.exist(index);
+            index.should.be.above(-1);
+            index.should.be.below(individual.cards.length);
+            
+            done();
+        });
+
+        it("should be able to get a random card value", function(done) {
+        
+            var size = 10;
+            var individual = new Individual();
+            individual.random(size);
+
+            var value = individual.getRandomCardValue();            
+            
+            should.exist(value);
+            value.should.be.below(10);
+            
+            done();
+        });
+        
+         it("should be able to replace a random card", function(done) {
+        
+            var size = 10;
+            var individual = new Individual();
+            individual.random(size);
+
+            individual.replaceRandomCard(5);            
+            
+            done();
+        });
     });
         
     describe("population tests", function() {
@@ -139,7 +179,8 @@ describe("ten card problem tests", function() {
     });
     
     describe("GA tests", function() {
-         it("should be able to select a loser", function(done) {
+        
+        it("should be able to rank individuals", function(done) {
             
             var size = 5;
             var individualSize = 10;
@@ -149,8 +190,9 @@ describe("ten card problem tests", function() {
             var individualsCount = 2;
             var individuals = population.pick(individualsCount);
             
-            var loserIndex = GA.selectLoser(population, individuals[0], individuals[1]);
+            var ranked = GA.rankIndividuals(population, individuals[0], individuals[1]);
             
+            var loserIndex = ranked.loser; 
             should.exist(loserIndex);
             loserIndex.should.be.above(-1);
             
@@ -165,6 +207,39 @@ describe("ten card problem tests", function() {
             var expectedLoserIndex = (first.getFitness().totalError > second.getFitness().totalError) ? individuals[0] : individuals[1];
             
             expectedLoserIndex.should.eql(loserIndex);
+            
+            done();
+        });
+        
+        it("should be able to recombine", function(done) {
+            var size = 5;
+            var individualSize = 10;
+            var population = new Population();
+            population.random(size, individualSize);
+            
+            GA.recombine(population, 0, 1);
+            
+            done();
+        });
+        
+        it("should be able to mutate", function(done) {
+            var size = 5;
+            var individualSize = 10;
+            var population = new Population();
+            population.random(size, individualSize);
+            
+            GA.mutate(population, 1);
+            
+            done();
+        });
+        
+        it("should be able to iterate", function(done) {
+            var size = 5;
+            var individualSize = 10;
+            var population = new Population();
+            population.random(size, individualSize);
+            
+            GA.iterate(population);
             
             done();
         });

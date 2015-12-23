@@ -29,6 +29,18 @@ Individual.prototype.random = function(size) {
     }
 }
 
+Individual.prototype.getRandomCardIndex = function() {
+    return Math.round(Math.random() * 1000) % this.cards.length;
+}
+
+Individual.prototype.getRandomCardValue = function() {
+    return this.cards[this.getRandomCardIndex()];
+}
+
+Individual.prototype.replaceRandomCard = function(card) {
+    this.cards[this.getRandomCardIndex()] = card;
+}
+
 Individual.prototype.getFitness = function() {
     
     var sumIdealValue = 36;
@@ -111,13 +123,16 @@ Population.prototype.pick = function(individualsCount) {
     return individuals;
 }
 
+Population.prototype.getFitness = function() {
+}
+
 // ----------------------------------------------------------------------------
 // GA
 function GA() {
     
 }
 
-GA.selectLoser = function (population, firstIndex, secondIndex) {
+GA.rankIndividuals = function (population, firstIndex, secondIndex) {
     
     var first = population.individuals[firstIndex];
     var second = population.individuals[secondIndex];
@@ -127,18 +142,53 @@ GA.selectLoser = function (population, firstIndex, secondIndex) {
         ? firstIndex
         : secondIndex;
     
-    return loserIndex;
+    return {
+        loser: loserIndex,
+        winner: firstIndex === loserIndex ? secondIndex : firstIndex
+    };
 }
 
 GA.recombine = function (population, winnerIndex, loserIndex) {
     // Take something from the winner and give it to the loser
+    // This part can probably be made *smarter*
+    var winnerCard = population.individuals[winnerIndex].getRandomCardValue();
+
+    log("Recombining ...");    
+    log(population.individuals[loserIndex].cards);
+    population.individuals[loserIndex].replaceRandomCard(winnerCard);
+    log(population.individuals[loserIndex].cards);
+    
+    return population;
 }
 
-function iterate(population) {
+GA.mutate = function (population, loserIndex) {
+    // Replace a random card with a random value
+    var randomCard = Individual.randomCard();
+    log("Mutating ...");    
+    log(population.individuals[loserIndex].cards);
+    population.individuals[loserIndex].replaceRandomCard(randomCard);
+    log(population.individuals[loserIndex].cards);
+    
+    return population;
+}
+
+GA.iterate = function (population) {
+    
     // Pick two individuals
     var individuals = population.pick(2);
+    log("Picked " + individuals);
     
-    // Select loser
+    // Select winer and loser
+    var ranked = GA.rankIndividuals(population, individuals[0], individuals[1]);
+    log("Winner " + ranked.winner + " loser " + ranked.loser);
+    
+    // Recombine loser 
+    population = GA.recombine(population, ranked.winner, ranked.loser);
+    
+    // Mutate loser
+    population = GA.mutate(population, ranked.loser);
+    
+    return population;
 }
 
 
