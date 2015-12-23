@@ -1,7 +1,9 @@
 var debug = true;
 
 module.exports = {
-    Population: Population
+    Individual: Individual,
+    Population: Population,
+    GA: GA
 };
 
 function log(message) {
@@ -9,11 +11,25 @@ function log(message) {
         console.log(message);
     }
 }
-function Population(cards) {
-    this.cards = cards;
+
+// ----------------------------------------------------------------------------
+// Individual
+function Individual(cards) {
+    this.cards = cards === null || cards === undefined ? [] : cards;
 }
 
-Population.prototype.getFitness = function() {
+Individual.randomCard = function() {
+    return Math.round(Math.random() * 1000) % 10;
+}
+    
+Individual.prototype.random = function(size) {
+    log("random individual of size = " + size);
+    for (var index = 0; index < size; index++) {
+        this.cards.push(Individual.randomCard());
+    }
+}
+
+Individual.prototype.getFitness = function() {
     
     var sumIdealValue = 36;
     var productIdealValue = 360;
@@ -51,12 +67,89 @@ Population.prototype.getFitness = function() {
     }
 }
 
-function generateRandomPopulation() {
+// ----------------------------------------------------------------------------
+// Population
+function Population() {
+    this.individuals = [];
 }
 
+Population.prototype.addIndividual = function(individual) {
+    this.individuals.push(individual);
+}
+
+Population.prototype.random = function(size, individualSize) {
+    for (var index = 0; index < size; index++) {
+        var individual = new Individual();
+        individual.random(individualSize);
+        this.addIndividual(individual);
+    }
+}
+
+Population.prototype.pick = function(individualsCount) {
+    
+    var that = this;
+    var pickOne = function() {
+        return Math.round(Math.random() * 1000) % that.individuals.length;
+    };
+    
+    var count = (individualsCount === null || individualsCount === undefined) ? 1 : individualsCount;
+    count = Math.min(count, this.individuals.length);
+    
+    log("Picking " + count + " individuals");
+    
+    var individuals = [];
+    
+    while(individuals.length < count) {
+        
+        var picked = pickOne();
+        if (individuals.indexOf(picked) === -1) {
+            individuals.push(picked);
+        }
+    }
+    
+    log(individuals);
+    return individuals;
+}
+
+// ----------------------------------------------------------------------------
+// GA
+function GA() {
+    
+}
+
+GA.selectLoser = function (population, firstIndex, secondIndex) {
+    
+    var first = population.individuals[firstIndex];
+    var second = population.individuals[secondIndex];
+            
+    var loserIndex =
+     (first.getFitness().totalError > second.getFitness().totalError) 
+        ? firstIndex
+        : secondIndex;
+    
+    return loserIndex;
+}
+
+GA.recombine = function (population, winnerIndex, loserIndex) {
+    // Take something from the winner and give it to the loser
+}
+
+function iterate(population) {
+    // Pick two individuals
+    var individuals = population.pick(2);
+    
+    // Select loser
+}
+
+
+// ----------------------------------------------------------------------------
 // Main
 function main() {
-    // Create initial population
-    var populationCount = 50;
-    var populations = generateRandomPopulation(populationCount);
+    // Create initial populations
+    // 10 is the size (i.e. number of cards), 50 is the nummber of sets of cards
+    var size = 10;
+    var count = 50;
+    var populations = generatePopulations(size, count);
+    log("Generated " + populations.length + " populations");
+    
 }
