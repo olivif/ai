@@ -176,6 +176,20 @@ describe("ten card problem tests", function() {
             done();
         });
         
+         it("should be able to get population fitness", function(done) {
+            
+            var size = 5;
+            var individualSize = 10;
+            var population = new Population();
+            population.random(size, individualSize);
+            
+            var fitness = population.getFitness();
+            
+            should.exist(fitness);
+            
+            done();
+        });
+        
     });
     
     describe("GA tests", function() {
@@ -245,5 +259,14 @@ describe("ten card problem tests", function() {
         });
     });
 
+    it("should be able to run main", function(done) {
+        
+        this.timeout(100000);
+        
+        main.main();
+        
+        done();
+    });
+        
 });
     

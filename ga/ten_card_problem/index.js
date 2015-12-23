@@ -3,7 +3,8 @@ var debug = true;
 module.exports = {
     Individual: Individual,
     Population: Population,
-    GA: GA
+    GA: GA,
+    main: main
 };
 
 function log(message) {
@@ -124,6 +125,12 @@ Population.prototype.pick = function(individualsCount) {
 }
 
 Population.prototype.getFitness = function() {
+    var totalFitness = 0;
+    this.individuals.forEach(function(individual) {
+        totalFitness += individual.getFitness().totalError;
+    });
+    
+    return totalFitness;
 }
 
 // ----------------------------------------------------------------------------
@@ -174,6 +181,8 @@ GA.mutate = function (population, loserIndex) {
 
 GA.iterate = function (population) {
     
+    var initialFitness = population.getFitness();
+    
     // Pick two individuals
     var individuals = population.pick(2);
     log("Picked " + individuals);
@@ -188,6 +197,9 @@ GA.iterate = function (population) {
     // Mutate loser
     population = GA.mutate(population, ranked.loser);
     
+    var currentFitness = population.getFitness();
+    log("Fitness improvement " + (initialFitness - currentFitness));
+    
     return population;
 }
 
@@ -196,10 +208,14 @@ GA.iterate = function (population) {
 // Main
 function main() {
     // Create initial populations
-    // 10 is the size (i.e. number of cards), 50 is the nummber of sets of cards
-    var size = 10;
-    var count = 50;
-    var populations = generatePopulations(size, count);
-    log("Generated " + populations.length + " populations");
+    var size = 50;
+    var individualSize = 10;
+    var population = new Population();
+    population.random(size, individualSize);
+    log("Generated populations");
     
+    var iterations = 10;
+    for (var index = 0; index < iterations; index++) {
+        population = GA.iterate(population);
+    }
 }
